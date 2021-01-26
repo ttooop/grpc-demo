@@ -135,5 +135,37 @@ service SearchService {
 }
 ```
 
+## gRPC basic: 4种通信方式
+
+hello world 使用了最简单的grpc通信方式：request+respones
+
+grpc支持4种通信方式：
+
+- 客户端一次请求，服务器一次应答
+- 客户端一次请求，服务器多次应答（流式）
+- 客户端多次请求（流式），服务器一次应答
+- 客户端多次请求（流式），服务器多次应答（流式）
+
+Demo:**routeguide**应用到了4种通信方式，具体业务如下：
+
+- 数据：json数据——包括地点经纬度（location）和地名name组成
+- 通信方式1:客户端请求一个地点——是否在数据源中
+- 通信方式2:客户端指定一个矩形（给定矩阵的对角点坐标），服务器返回这个矩阵范围内的地点信息
+- 通信方式3:客户端给服务器发送多个地点信息，服务器返回汇总信息（RouteSummary）
+- 通信方式4:客户端和服务器使用地点信息聊天（chat）
+
 ## 跨语言服务java&python
 
+
+
+
+
+# 参考网址：
+
+grpc| python 实战 grpc：
+
+https://www.jianshu.com/p/43fdfeb105ff?isappinstalled=0
+
+官方文档：
+
+https://grpc.io/
