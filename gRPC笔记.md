@@ -93,6 +93,38 @@ python -m grpc_tools.protoc: python 下的 protoc 编译器通过 python 模块(
 
 **4.编写server和client**
 
+服务端核心代码：
+
+```python
+def server():
+  server=grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+	demo_pd2_grpc.add_GreeterServicer_to_server(Greeter(),server)
+  # 服务端这里只需要提供端口号
+	server.add_insecure_port('[::]:50051')
+	server.start()
+	try:
+    while True:
+      time.sleep(60*60*24)
+  except KeyboardInterrupt:
+    server.stop(0)
+```
+
+
+
+客户端核心代码：
+
+```python
+def run():
+  # 连接grpc服务器
+  channel=grpc.insecure_channel('localhost:50051')
+  # 调用grpc服务
+  stub=demo_pb2.grpc.GreeterStub(channel)
+  # 接收返回结果
+  response=stub.SayHello(hello_pb2.HelloRequest(name='test1'))
+```
+
+
+
 ## protobuf3 语言指南
 
 **定义一个消息类型**
@@ -156,9 +188,106 @@ Demo:**routeguide**应用到了4种通信方式，具体业务如下：
 
 ## 跨语言服务java&python
 
+python demo过程如“demo实战”
 
+java：
 
+**1. 添加依赖：**
 
+```xml
+<!--grpc依赖-->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty</artifactId>
+            <version>1.35.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>1.35.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.35.0</version>
+        </dependency>
+```
+
+**2. 添加插件：**
+
+```xml
+<build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.2</version>
+            </extension>
+        </extensions>
+        <plugins>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.6.1</version>
+                <configuration>
+                    <protocArtifact>com.google.protobuf:protoc:3.12.0:exe:${os.detected.classifier}</protocArtifact>
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.35.0:exe:${os.detected.classifier}</pluginArtifact>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+```
+
+**3. 添加.proto文件：**
+
+目录/java同级目录
+
+PS。java的与python的略有不同
+
+**4. 编译proto**
+
+生成对应rpc传输的数据结构类：
+
+![截屏2021-01-28 下午12.49.51](https://tva1.sinaimg.cn/large/008eGmZEly1gn3beglwcdj31m60u0as0.jpg)
+
+再经过一步package将项目打包，生成对应服务端的代码：
+
+此时在target/generated-sources/protobuf下会生成graph-java文件夹
+
+**5. service和client程序代码**
+
+思路与python大致一致
+
+## 大坑！！！
+
+**跨语言调用注意！！！**
+
+python和java的proto文件中的package一定要一致！！！
+
+不然会通不了
 
 # 参考网址：
 

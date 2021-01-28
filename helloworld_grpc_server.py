@@ -25,6 +25,7 @@ class Greeter(helloworld_pb2_grpc.GreeterServicer):
         :param context:
         :return:
         """
+        print("客户端收到请求" + request.name)
         return helloworld_pb2.HelloReply(message='hello {msg}'.format(msg=request.name))
 
     def SayHelloAgain(self, request, context):
@@ -37,6 +38,7 @@ def server():
     helloworld_pb2_grpc.add_GreeterServicer_to_server(Greeter(), server)
     server.add_insecure_port('[::]:50051')
     server.start()
+    print("grpc server start!")
     try:
         while True:
             time.sleep(60 * 60 * 24)
